@@ -1,19 +1,43 @@
 <script>
-  import Card from "./Card.svelte";
-  import Button from "./Button.svelte";
+  import { v4 as uuidv4 } from "uuid";
+  import FeedbackStore from "../../stores/FeedbackStore";
+  import Card from "../Ui/Card.svelte";
+  import Button from "../Ui/Button.svelte";
+  import RatingSelect from "../Ui/RatingSelect.svelte";
 
-  let text = "";
+  const minCharacters = 10;
+
+  let text;
+  let rating = 10;
   let buttonDisabled = true;
-  const min = 10;
   let message;
 
   const handleInput = () => {
-    if (text.trim().length <= min) {
-      message = `Text must be at least ${min} characters`;
+    if (text.trim().length <= minCharacters) {
+      message = `Text must be at least ${minCharacters} characters`;
       buttonDisabled = true;
     } else {
       message = null;
       buttonDisabled = false;
+    }
+  };
+
+  const handleSelect = (e) => (rating = e.detail);
+
+  const handleSubmit = () => {
+    if (text.trim().length > minCharacters) {
+      const newFeedback = {
+        id: uuidv4(),
+        text,
+        rating: +rating,
+      };
+
+      FeedbackStore.update((currentFeedback) => {
+        return [newFeedback, ...currentFeedback];
+      });
+
+      text = null;
+      buttonDisabled = true;
     }
   };
 </script>
@@ -22,8 +46,8 @@
   <header>
     <h2>How would you rate your service with us?</h2>
   </header>
-  <form>
-    <!-- Rating Select -->
+  <form on:submit|preventDefault={handleSubmit}>
+    <RatingSelect on:rating-select={handleSelect} />
     <div class="input-group">
       <input
         type="text"

@@ -1,6 +1,10 @@
 <script>
-  export let count;
-  export let average;
+  import FeedbackStore from "../../stores/FeedbackStore";
+
+  $: count = $FeedbackStore.length;
+  $: average =
+    $FeedbackStore.reduce((prevItem, { rating }) => prevItem + rating, 0) /
+    $FeedbackStore.length;
 </script>
 
 <div class="feedback-stats">
